@@ -20,11 +20,6 @@ public class CategoryServiceImpl implements CategoryService {
 	@Override
 	public Boolean saveCategory(Category category) {
 		
-		
-		System.out.println("Name = " + category.getName());
-	    System.out.println("Description = " + category.getDescription());
-	    System.out.println("Is Active = " + category.getIsActive());
-		
 		category.setIsDeleted(false);
 		category.setCreatedBy(1);
 		category.setCreatedOn(new Date());

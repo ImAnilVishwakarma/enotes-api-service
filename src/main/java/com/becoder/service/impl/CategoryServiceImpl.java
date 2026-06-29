@@ -1,10 +1,12 @@
 package com.becoder.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.catalina.mapper.Mapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import java.util.Date;
@@ -23,6 +25,10 @@ public class CategoryServiceImpl implements CategoryService {
 	
 	@Autowired
 	private ModelMapper mapper;
+
+	private Optional<Category> byId;
+
+	private CrudRepository<Category, Integer> categoryRepo;
 
 	@Override
 	public Boolean saveCategory(CategoryDto categoryDto) {
@@ -52,7 +58,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public List<CategoryDto> getAllCategory() {
-		List<Category> categories = repo.findAll();
+		List<Category> categories = repo.findByIsDeletedFalse();
 		List<CategoryDto> categoryDtoList = categories.stream().map(cat-> mapper.map(cat, CategoryDto.class)).toList();
 		return categoryDtoList;
 	}
@@ -67,8 +73,32 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public List<CategoryResponse> getActiveCategory() {
-		List<Category> categories = repo.findByIsActiveTrue();
+		List<Category> categories = repo.findByIsActiveTrueAndIsDeletedFalse();
 		List<CategoryResponse> CategoryList = categories.stream().map(cat-> mapper.map(cat, CategoryResponse.class)).toList();
 		return CategoryList;
+	}
+
+
+	@Override
+	public CategoryDto getCategoryById(Integer id) {
+		  Optional<Category> findByCategory = repo.findByIdAndIsDeletedFalse(id);
+		  if(findByCategory.isPresent()) {
+			  Category category = findByCategory.get();
+			  return mapper.map(category, CategoryDto.class);
+		  }
+		  return null;
+	}
+
+
+	@Override
+	public Boolean deleteCategory(Integer id) {
+		Optional<Category> findByCategory = repo.findById(id);
+		  if(findByCategory.isPresent()) {
+			  Category category = findByCategory.get();
+			  category.setIsDeleted(true);
+			  repo.save(category);
+			  return true;
+		  }
+		  return null;
 	}
 }

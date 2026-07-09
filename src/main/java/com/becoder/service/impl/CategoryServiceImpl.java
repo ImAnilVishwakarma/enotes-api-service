@@ -14,6 +14,7 @@ import java.util.Date;
 import com.becoder.dto.CategoryDto;
 import com.becoder.dto.CategoryResponse;
 import com.becoder.entity.Category;
+import com.becoder.exception.ResourceNotFoundException;
 import com.becoder.repository.CategoryRepo;
 import com.becoder.service.CategoryService;
 
@@ -25,9 +26,7 @@ public class CategoryServiceImpl implements CategoryService {
 	
 	@Autowired
 	private ModelMapper mapper;
-
 	private Optional<Category> byId;
-
 	private CrudRepository<Category, Integer> categoryRepo;
 
 	@Override
@@ -102,13 +101,17 @@ public class CategoryServiceImpl implements CategoryService {
 
 
 	@Override
-	public CategoryDto getCategoryById(Integer id) {
-		  Optional<Category> findByCategory = repo.findByIdAndIsDeletedFalse(id);
-		  if(findByCategory.isPresent()) {
-			  Category category = findByCategory.get();
+	public CategoryDto getCategoryById(Integer id) throws Exception {
+		  Category category = repo.findByIdAndIsDeletedFalse(id)
+				  .orElseThrow(()->new ResourceNotFoundException("Category not found with id="+id));
+		  if(!ObjectUtils.isEmpty(category)) {
+			  if(category.getName () == null) {
+				  throw new IllegalArgumentException("Name Is Null");
+			  }
+
 			  return mapper.map(category, CategoryDto.class);
 		  }
-		  return null;
+		  return null; 
 	}
 
 

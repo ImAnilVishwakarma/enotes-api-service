@@ -12,7 +12,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
 public class CategoryDto {
 	
 	private Integer id;
@@ -30,5 +29,4 @@ public class CategoryDto {
 	private Integer updatedBy;
 	
 	private Date updatedOn;
-
 }

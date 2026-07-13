@@ -3,7 +3,6 @@ package com.becoder.service.impl;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.catalina.mapper.Mapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
@@ -17,6 +16,7 @@ import com.becoder.entity.Category;
 import com.becoder.exception.ResourceNotFoundException;
 import com.becoder.repository.CategoryRepo;
 import com.becoder.service.CategoryService;
+import com.becoder.util.Validation;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -26,6 +26,10 @@ public class CategoryServiceImpl implements CategoryService {
 	
 	@Autowired
 	private ModelMapper mapper;
+	
+	@Autowired
+	private Validation validation;
+	
 	private Optional<Category> byId;
 	private CrudRepository<Category, Integer> categoryRepo;
 
@@ -42,6 +46,8 @@ public class CategoryServiceImpl implements CategoryService {
 		
 // ModelMapper Annotation used 
 				
+		validation.categoryValidation(categoryDto);
+		
 		Category category = mapper.map(categoryDto, Category.class);	
 	
 		if(ObjectUtils.isEmpty(category)) 

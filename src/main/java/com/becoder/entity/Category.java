@@ -18,6 +18,8 @@ import lombok.Setter;
 @Setter
 @Getter
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Category extends BaseModel {
 

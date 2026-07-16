@@ -13,6 +13,7 @@ import java.util.Date;
 import com.becoder.dto.CategoryDto;
 import com.becoder.dto.CategoryResponse;
 import com.becoder.entity.Category;
+import com.becoder.exception.ExistDataException;
 import com.becoder.exception.ResourceNotFoundException;
 import com.becoder.repository.CategoryRepo;
 import com.becoder.service.CategoryService;
@@ -26,6 +27,8 @@ public class CategoryServiceImpl implements CategoryService {
 	
 	@Autowired
 	private ModelMapper mapper;
+	
+	
 	
 	@Autowired
 	private Validation validation;
@@ -47,6 +50,13 @@ public class CategoryServiceImpl implements CategoryService {
 // ModelMapper Annotation used 
 				
 		validation.categoryValidation(categoryDto);
+		
+	    Boolean exist = repo.existsByName(categoryDto.getName().trim());
+	    if(exist) {
+	    	
+	    	throw new ExistDataException("Category already exist");
+	    	
+	    }
 		
 		Category category = mapper.map(categoryDto, Category.class);	
 	
@@ -93,7 +103,6 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public Boolean saveCategory(Category category) {
-		// TODO Auto-generated method stub
 		return saveCategory(category);
 	}
 

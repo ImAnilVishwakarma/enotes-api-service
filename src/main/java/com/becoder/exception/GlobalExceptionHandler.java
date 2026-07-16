@@ -35,7 +35,12 @@ public class GlobalExceptionHandler {
 	
 	@ExceptionHandler(ValidationException.class)
 	public ResponseEntity<?> handleValidationException(ValidationException e){
-		return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(e.getError(),HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler(ExistDataException.class)
+	public ResponseEntity<?> handleExistDataException(ExistDataException e){
+		return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
 	}
 	
 }

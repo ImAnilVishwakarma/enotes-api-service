@@ -1,5 +1,7 @@
 package com.becoder.exception;
 
+import java.io.FileNotFoundException;
+
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,4 +52,9 @@ public class GlobalExceptionHandler {
 		//	return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
 	}
 	
+	@ExceptionHandler(FileNotFoundException.class)
+	public ResponseEntity<?> handleFileNotFoundException(FileNotFoundException e){
+		return	CommonUtil.createBuildResponseMessage(e.getMessage(), HttpStatus.NOT_FOUND);
+		//	return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
+	}
 }

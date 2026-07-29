@@ -16,6 +16,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
@@ -23,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.becoder.dto.CategoryDto;
 import com.becoder.dto.NotesDto;
+import com.becoder.dto.NotesResponse;
 import com.becoder.entity.FileDetails;
 import com.becoder.entity.Notes;
 import com.becoder.exception.ResourceNotFoundException;
@@ -139,22 +143,15 @@ public class NotesServiceImpl implements NotesService{
 	@Override
 	public List<NotesDto> getAllNotes() {
 		return notesRepo.findAll().stream()
-				.map(notes -> mapper.map(notes, NotesDto.class)).toList();
-
-		
+				.map(notes -> mapper.map(notes, NotesDto.class)).toList();	
 	}
-
-
 
 	@Override
 	public byte[] downloadFile(FileDetails fileDetails) throws Exception {
 		
 	  InputStream io = new FileInputStream(fileDetails.getPath());
-	  return StreamUtils.copyToByteArray(io);
-		
+	  return StreamUtils.copyToByteArray(io);	
 	}
-
-
 
 	@Override
 	public FileDetails getFileDetails(Integer id) throws Exception {
@@ -162,4 +159,30 @@ public class NotesServiceImpl implements NotesService{
 		  return fileDtls;
 	}
 
+
+
+	@Override
+	public NotesResponse getAllNotesByUser(Integer userId, Integer pageNo ,Integer pageSize) {
+		Pageable pageable = (Pageable) PageRequest.of(pageNo, pageSize);  // page indexing starting from
+		Page<Notes> pageNotes = (Page<Notes>) notesRepo.findByCreatedBy(userId, pageable);
+		List<NotesDto> noteDto = pageNotes.getContent().stream().map(n -> mapper.map(n, NotesDto.class)).toList();	  
+	    NotesResponse notes = NotesResponse.builder()
+	    		.notes(noteDto)
+	    		.pageNo(pageNotes.getNumber () )
+	    		.pageSize(pageNotes.getSize ())
+	    		.totalElements(pageNotes.getTotalElements())
+	    		.totalPages(pageNotes.getTotalPages ())
+	    		.isFirst(pageNotes.isFirst())
+	    		.isLast(pageNotes.isLast ())
+	    		.build();
+		return notes;
+	}
+
+
+
+	@Override
+	public NotesResponse getAllNotesByUser(Integer userId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

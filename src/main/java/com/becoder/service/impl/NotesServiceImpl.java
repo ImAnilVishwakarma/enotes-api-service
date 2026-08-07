@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.becoder.dto.CategoryDto;
 import com.becoder.dto.NotesDto;
+import com.becoder.dto.NotesDto.FileDto;
 import com.becoder.dto.NotesResponse;
 import com.becoder.entity.FileDetails;
 import com.becoder.entity.Notes;
@@ -59,6 +61,17 @@ public class NotesServiceImpl implements NotesService{
 
 	    ObjectMapper objectMapper = new ObjectMapper();
 	    NotesDto notesDto = objectMapper.readValue(notes, NotesDto.class);
+	    
+	    System.out.println(notesDto.getId());
+	    System.out.println(notesDto.getTitle());
+	    System.out.println(notesDto.getDescription());
+	    System.out.println(notesDto.getCategory());
+	    
+	    if (!ObjectUtils.isEmpty(notesDto.getId()))
+	    {
+	      updateNotes(notesDto, file);
+	    }
+
 
 	    // Category validation
 	    CheckCategoryExist(notesDto.getCategory());
@@ -81,7 +94,16 @@ public class NotesServiceImpl implements NotesService{
 		return false;
 	}
 
-	  
+	private void updateNotes(NotesDto notesDto, MultipartFile file) throws Exception {
+		
+	 Notes existNotes =	notesRepo.findById(notesDto.getId()).orElseThrow(()-> new ResourceNotFoundException("Notes id invalid"));
+	 
+	 if (ObjectUtils.isEmpty(file)) {
+		 notesDto.setFileDetails(mapper.map(existNotes.getFileDetails() , FileDto.class));
+	 }
+	}
+
+
 
 	private FileDetails saveFileDetails(MultipartFile file) throws IOException {
 
@@ -159,8 +181,6 @@ public class NotesServiceImpl implements NotesService{
 		  return fileDtls;
 	}
 
-
-
 	@Override
 	public NotesResponse getAllNotesByUser(Integer userId, Integer pageNo ,Integer pageSize) {
 		Pageable pageable = (Pageable) PageRequest.of(pageNo, pageSize);  // page indexing starting from
@@ -179,10 +199,8 @@ public class NotesServiceImpl implements NotesService{
 	}
 
 
-
 	@Override
 	public NotesResponse getAllNotesByUser(Integer userId) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

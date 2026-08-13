@@ -1,5 +1,6 @@
  package com.becoder.entity;
  
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -37,7 +38,7 @@ public class Notes extends BaseModel{
 	private FileDetails fileDetails;
     
     private Boolean isDeleted;
-    private Date deletedOn;
+    private LocalDateTime deletedOn;
     
     
 

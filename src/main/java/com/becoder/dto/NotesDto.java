@@ -1,5 +1,6 @@
 package com.becoder.dto;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.becoder.entity.FileDetails;
@@ -33,7 +34,7 @@ public class NotesDto {
 	
 	private Boolean isDeleted;
    
-	private Date deletedOn;
+	private LocalDateTime deletedOn;
 	
 	@AllArgsConstructor
 	@NoArgsConstructor

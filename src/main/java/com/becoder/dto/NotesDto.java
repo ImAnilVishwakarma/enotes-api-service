@@ -1,6 +1,9 @@
 package com.becoder.dto;
 
 import java.util.Date;
+
+import com.becoder.entity.FileDetails;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

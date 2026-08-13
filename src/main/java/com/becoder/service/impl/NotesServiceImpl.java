@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,10 +57,13 @@ public class NotesServiceImpl implements NotesService{
 	
 	@Override
 	public Boolean saveNotes(String notes, MultipartFile file) throws Exception {
-
+		
 	    ObjectMapper objectMapper = new ObjectMapper();
 	    NotesDto notesDto = objectMapper.readValue(notes, NotesDto.class);
 
+	    notesDto.setIsDeleted(false);
+	    notesDto.setDeletedOn(null);
+	    
 	    // Category validation
 	    CheckCategoryExist(notesDto.getCategory());
 
@@ -164,7 +168,7 @@ public class NotesServiceImpl implements NotesService{
 	@Override
 	public NotesResponse getAllNotesByUser(Integer userId, Integer pageNo ,Integer pageSize) {
 		Pageable pageable = (Pageable) PageRequest.of(pageNo, pageSize);  // page indexing starting from
-		Page<Notes> pageNotes = (Page<Notes>) notesRepo.findByCreatedBy(userId, pageable);
+		Page<Notes> pageNotes = (Page<Notes>) notesRepo.findByCreatedByAndIsDeletedFalse(userId, pageable);
 		List<NotesDto> noteDto = pageNotes.getContent().stream().map(n -> mapper.map(n, NotesDto.class)).toList();	  
 	    NotesResponse notes = NotesResponse.builder()
 	    		.notes(noteDto)
@@ -177,12 +181,34 @@ public class NotesServiceImpl implements NotesService{
 	    		.build();
 		return notes;
 	}
-
-
+	
 
 	@Override
 	public NotesResponse getAllNotesByUser(Integer userId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public void softDeleteNotes(Integer id) throws Exception {
+		Notes notes = notesRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Notes id invalid ! Not found"));
+		notes.setIsDeleted(true);
+		notes.setDeletedOn(new Date());
+		notesRepo.save(notes);
+	}
+
+	@Override
+	public void restoreNotes(Integer id) throws Exception {
+		Notes notes = notesRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Notes id invalid ! Not found"));
+		notes.setIsDeleted(false);
+		notes.setDeletedOn(null);
+		notesRepo.save(notes);
+	}
+
+	@Override
+	public List<NotesDto> getUserRecycleBinNotes(Integer userld) {
+	 	List<Notes> recycleNotes = notesRepo.findByCreatedByAndIsDeletedTrue(userld);
+		List<NotesDto>notesDtoList = recycleNotes.stream().map(note -> mapper.map(note, NotesDto.class)).toList();
+		return notesDtoList;
+	}		
 }

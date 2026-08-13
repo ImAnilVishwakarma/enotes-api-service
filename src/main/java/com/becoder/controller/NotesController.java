@@ -27,59 +27,77 @@ import com.becoder.util.CommonUtil;
 @RestController
 @RequestMapping("/api/v1/notes")
 public class NotesController {
-	
+
 	@Autowired
 	private NotesService notesService;
-	
-	
-	@PostMapping ("/")
-	public ResponseEntity<?> saveNotes(@RequestParam String notes,@RequestParam(required = false) MultipartFile file) throws Exception {
 
-	Boolean saveNotes = notesService.saveNotes(notes, file);
+	@PostMapping("/")
+	public ResponseEntity<?> saveNotes(@RequestParam String notes, @RequestParam(required = false) MultipartFile file)
+			throws Exception {
 
-	if (saveNotes) {
-	return CommonUtil.createBuildResponseMessage("Notes saved success", HttpStatus.CREATED);
+		Boolean saveNotes = notesService.saveNotes(notes, file);
+
+		if (saveNotes) {
+			return CommonUtil.createBuildResponseMessage("Notes saved success", HttpStatus.CREATED);
+		}
+		return CommonUtil.createErrorResponseMessage("Notes not saved", HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	return CommonUtil.createErrorResponseMessage("Notes not saved", HttpStatus.INTERNAL_SERVER_ERROR);
-	}
-	
-	
+
 	@GetMapping("/download/{id}")
-	public ResponseEntity<?> downloadFile(@PathVariable Integer id) throws Exception{
-		
-	 FileDetails fileDetails = notesService.getFileDetails(id);
-	 byte[] data = notesService.downloadFile(fileDetails); 
-	 
-	 HttpHeaders headers = new HttpHeaders();
-	 String contentType =  CommonUtil.getContentType(fileDetails.getOriginalFileName());
-	 headers.setContentType(MediaType.parseMediaType(contentType));
-	 headers.setContentDispositionFormData("attechment", fileDetails.getOriginalFileName());
+	public ResponseEntity<?> downloadFile(@PathVariable Integer id) throws Exception {
+
+		FileDetails fileDetails = notesService.getFileDetails(id);
+		byte[] data = notesService.downloadFile(fileDetails);
+
+		HttpHeaders headers = new HttpHeaders();
+		String contentType = CommonUtil.getContentType(fileDetails.getOriginalFileName());
+		headers.setContentType(MediaType.parseMediaType(contentType));
+		headers.setContentDispositionFormData("attechment", fileDetails.getOriginalFileName());
 		return ResponseEntity.ok().headers(headers).body(data);
 	}
-	
 
 	@GetMapping("/")
 	public ResponseEntity<?> getAllNotes() {
 
-	    List<NotesDto> allNotes = notesService.getAllNotes();
+		List<NotesDto> allNotes = notesService.getAllNotes();
 
-	    if (!CollectionUtils.isEmpty(allNotes)) {
-	        return CommonUtil.createBuildResponse(allNotes, HttpStatus.OK);
-	    }
+		if (!CollectionUtils.isEmpty(allNotes)) {
+			return CommonUtil.createBuildResponse(allNotes, HttpStatus.OK);
+		}
 
-	    return CommonUtil.createErrorResponseMessage("No Notes Found", HttpStatus.NOT_FOUND);
+		return CommonUtil.createErrorResponseMessage("No Notes Found", HttpStatus.NOT_FOUND);
 	}
 
 	@GetMapping("/user-notes")
-	public ResponseEntity<?> getAllNotesByUser(
-			@RequestParam(name = "pageNo" , defaultValue = "0") Integer pageNo,
-			@RequestParam(name = "pageSize" , defaultValue = "10") Integer pageSize
-			) {
+	public ResponseEntity<?> getAllNotesByUser(@RequestParam(name = "pageNo", defaultValue = "0") Integer pageNo,
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
 		Integer userId = 2;
 		NotesResponse notes = notesService.getAllNotesByUser(userId, pageNo, pageSize);
 //		if (CollectionUtils.isEmpty(notes)) {
 //			return ResponseEntity.noContent().build();
 //		}
+		return CommonUtil.createBuildResponse(notes, HttpStatus.OK);
+	}
+
+	@GetMapping("/delete/{id}")
+	public ResponseEntity<?> deleteNotes(@PathVariable Integer id) throws Exception {
+		notesService.softDeleteNotes(id);
+		return CommonUtil.createBuildResponseMessage("Delete Success", HttpStatus.OK);
+	}
+
+	@GetMapping("/restore/{id}")
+	public ResponseEntity<?> restoreNotes(@PathVariable Integer id) throws Exception {
+		notesService.restoreNotes(id);
+		return CommonUtil.createBuildResponseMessage("Notes restore Success", HttpStatus.OK);
+	}
+
+	@GetMapping("/recycle-bin")
+	public ResponseEntity<?> getUserRecycleBinNotes() throws Exception {
+		Integer userld = 2;
+		List<NotesDto> notes = notesService.getUserRecycleBinNotes(userld);
+		if(CollectionUtils.isEmpty(notes)) {
+			return CommonUtil.createBuildResponseMessage("Notes not avaible in Recycle Bin", HttpStatus.OK);
+		}
 		return CommonUtil.createBuildResponse(notes, HttpStatus.OK);
 	}
 

@@ -28,6 +28,10 @@ public class NotesDto {
 	
 	private FileDto fileDetails;
 	
+	private Boolean isDeleted;
+   
+	private Date deletedOn;
+	
 	@AllArgsConstructor
 	@NoArgsConstructor
 	@Getter

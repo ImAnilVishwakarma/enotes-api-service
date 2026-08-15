@@ -30,13 +30,16 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.becoder.dto.CategoryDto;
+import com.becoder.dto.FavouriteNoteDto;
 import com.becoder.dto.NotesDto;
 import com.becoder.dto.NotesDto.FileDto;
 import com.becoder.dto.NotesResponse;
+import com.becoder.entity.FavouriteNote;
 import com.becoder.entity.FileDetails;
 import com.becoder.entity.Notes;
 import com.becoder.exception.ResourceNotFoundException;
 import com.becoder.repository.CategoryRepo;
+import com.becoder.repository.FavouriteNoteRepository;
 import com.becoder.repository.FileRepository;
 import com.becoder.repository.NotesRespository;
 import com.becoder.service.NotesService;
@@ -59,6 +62,10 @@ public class NotesServiceImpl implements NotesService{
 	
 	@Autowired
 	private FileRepository fileRepo;
+	
+	@Autowired
+	private FavouriteNoteRepository favouriteNoteRepo;
+
 	
 	@Override
 	public Boolean saveNotes(String notes, MultipartFile file) throws Exception {
@@ -252,4 +259,35 @@ public class NotesServiceImpl implements NotesService{
 	 	   notesRepo.deleteAll(recycleNotes);	
 	 	}
 	}
+
+	@Override
+	public void favoriteNotes(Integer noteId) throws Exception {
+		int userld = 2;
+		Notes notes = notesRepo.findById (noteId)
+		.orElseThrow(() -> new ResourceNotFoundException("Notes Not found & Id invalid"));
+		FavouriteNote favouriteNote = FavouriteNote
+				.builder()
+				.note (notes)
+				.userId(userld)
+				.build();
+		favouriteNoteRepo.save (favouriteNote);
+	}
+
+	@Override
+	public boolean unFavoriteNotes(Integer favouriteNoteId) throws Exception {
+		  FavouriteNote favNote =   favouriteNoteRepo.findById(favouriteNoteId)
+				.orElseThrow(() -> new ResourceNotFoundException("Note Not found & Id invalid"));
+				favouriteNoteRepo.delete(favNote) ;
+		return false;
+	}
+
+
+	@Override
+	public List<FavouriteNoteDto> getUserFavoriteNotes() throws Exception {
+		int userld = 2;
+		List<FavouriteNote> favouriteNotes = favouriteNoteRepo.findByUserId(userld);
+		return favouriteNotes.stream().map(fn -> mapper.map(fn, FavouriteNoteDto.class)).toList();
+
+	}
+
 }

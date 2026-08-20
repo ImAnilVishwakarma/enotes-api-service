@@ -13,18 +13,21 @@ import com.becoder.service.UserService;
 import com.becoder.util.CommonUtil;
 
 @RestController
-@RequestMapping ("/api/v1/user")
-public class UserController {
-	
+@RequestMapping ("/api/v1/auth")
+public class AuthController {
+
 	@Autowired
 	private UserService userService;
 	
 	@PostMapping("/")
 	public ResponseEntity<?> registerUser(@RequestBody UserDto userDto) throws Exception {
+
 		Boolean register = userService.register(userDto);
+		
 		if (register) {
 			return CommonUtil.createBuildResponseMessage("Register success", HttpStatus.CREATED);
 		}
-		return CommonUtil.createErrorResponse("Register Failed", HttpStatus.INTERNAL_SERVER_ERROR);
+		return CommonUtil.createErrorResponseMessage("Register failed", HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+
 }

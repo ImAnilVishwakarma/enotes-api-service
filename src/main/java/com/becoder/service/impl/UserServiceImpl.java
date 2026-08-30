@@ -1,20 +1,28 @@
 package com.becoder.service.impl;
 
+import java.beans.Customizer;
 import java.util.List;
 import java.util.UUID;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import com.becoder.config.security.CustomUserDetails;
 import com.becoder.dto.EmailRequest;
+import com.becoder.dto.LoginRequest;
+import com.becoder.dto.LoginResponse;
 import com.becoder.dto.UserDto;
 import com.becoder.entity.AccountStatus;
 import com.becoder.entity.Role;
 import com.becoder.entity.User;
 import com.becoder.repository.RoleRepository;
 import com.becoder.repository.UserRepository;
+import com.becoder.service.JwtService;
 import com.becoder.service.UserService;
 import com.becoder.util.Validation;
 
@@ -36,6 +44,16 @@ public class UserServiceImpl implements UserService{
 	
     @Autowired
 	private EmailService emailService;
+    
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private JwtService jwtService;
+
 	
 	
 	@Override
@@ -49,7 +67,7 @@ public class UserServiceImpl implements UserService{
 				.verificationCode (UUID. randomUUID() .toString())
 				.build();
 				user.setStatus (status) ;
-		
+				user.setPassword (passwordEncoder.encode(user.getPassword()));
 		
 		User saveUser = userRepo.save(user);
 		if (!ObjectUtils.isEmpty(saveUser)) {
@@ -102,5 +120,26 @@ public class UserServiceImpl implements UserService{
 
 			}
 
-	}	
+			@Override
+			public LoginResponse login(LoginRequest loginRequest) {
+				Authentication authenticate = authenticationManager.authenticate(
+						new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
+				if (authenticate.isAuthenticated()) {
+					CustomUserDetails customUserDetails = (CustomUserDetails) authenticate.getPrincipal();
+					String token = jwtService.generateToken(customUserDetails.getUser());
+					
+					LoginResponse loginResponse = LoginResponse.builder()
+							.user(mapper.map(customUserDetails.getUser(), UserDto.class))
+							.token(token)
+							.build();
+
+					return loginResponse;
+				}
+				return null;
+
+			}
+			
+			
+
+		}

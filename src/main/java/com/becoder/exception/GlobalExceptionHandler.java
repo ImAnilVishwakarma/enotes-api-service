@@ -1,6 +1,7 @@
 package com.becoder.exception;
 
 import java.io.FileNotFoundException;
+import java.nio.file.AccessDeniedException;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.becoder.util.CommonUtil;
 
 import ch.qos.logback.classic.Logger;
+import io.jsonwebtoken.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -28,10 +30,17 @@ public class GlobalExceptionHandler {
 		 return	CommonUtil.createErrorResponseMessage(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
     
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException e) {
+        log.error("GlobalExceptionHandler :: handleException :: ", e);
+		 return	CommonUtil.createErrorResponseMessage(e.getMessage(), HttpStatus.FORBIDDEN);
+    }
+    
+    
 	@ExceptionHandler(SuccessException.class)
 	public ResponseEntity<?> handleSuccessException(SuccessException e) {
 		log.error("GlobalExceptionHandler :: handleException ::", e.getMessage());
-		return CommonUtil.createBuildResponseMessage(e.getMessage(), HttpStatus.OK);
+		return CommonUtil.createErrorResponseMessage(e.getMessage(), HttpStatus.OK);
 	}
 
     
@@ -62,21 +71,32 @@ public class GlobalExceptionHandler {
 	
 	@ExceptionHandler(ExistDataException.class)
 	public ResponseEntity<?> handleExistDataException(ExistDataException e){
-		return	CommonUtil.createErrorResponse(e.getMessage(), HttpStatus.CONFLICT);
+		return	CommonUtil.createErrorResponseMessage(e.getMessage(), HttpStatus.CONFLICT);
 	}
 	
 	@ExceptionHandler(FileNotFoundException.class)
 	public ResponseEntity<?> handleFileNotFoundException(FileNotFoundException e){
-		return	CommonUtil.createErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+		return	CommonUtil.createErrorResponseMessage(e.getMessage(), HttpStatus.NOT_FOUND);
 	}
 	
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e){
-		return	CommonUtil.createErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+		return	CommonUtil.createErrorResponseMessage(e.getMessage(), HttpStatus.BAD_REQUEST);
 	}
 	
 	@ExceptionHandler(BadCredentialsException.class)
 	public ResponseEntity<?> handleBadCredentialsException(BadCredentialsException e){
-		return	CommonUtil.createErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+		return	CommonUtil.createErrorResponseMessage(e.getMessage(), HttpStatus.BAD_REQUEST);
 	}
+	
+	@ExceptionHandler(SignatureException.class)
+	public ResponseEntity<?> handleSignatureException(SignatureException e){
+		return	CommonUtil.createErrorResponseMessage(e.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler(JwtAuthenticationException.class)
+	public ResponseEntity<?> handleJwtAuthenticationException(JwtAuthenticationException e){
+		return	CommonUtil.createErrorResponseMessage(e.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+	
 }

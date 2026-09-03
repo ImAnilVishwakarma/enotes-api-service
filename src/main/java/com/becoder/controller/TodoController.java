@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ public class TodoController {
 	private TodoService todoService;
 
 	@PostMapping("/")
+	@PreAuthorize("hasRole ('USER')")
 	public ResponseEntity<?> saveTodo(@RequestBody TodoDto todo) throws Exception {
 		Boolean saveTodo = todoService.saveTodo(todo);
 		if (saveTodo) {
@@ -36,19 +38,19 @@ public class TodoController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<?> saveTodo(@PathVariable Integer id) throws Exception {
+	@PreAuthorize("hasRole ('USER')")
+	public ResponseEntity<?> getTodoById(@PathVariable Integer id) throws Exception {
 		TodoDto todo = todoService.getTodoById(id);
 		return CommonUtil.createBuildResponse(todo, HttpStatus.OK);
 	}
 	
-		@GetMapping("/list")
-		public ResponseEntity<?> getAllTodoByUser() throws Exception {
-			List<TodoDto> todolist = todoService.getTodoByUser();
-			if (CollectionUtils.isEmpty(todolist)) {
-				return ResponseEntity.noContent().build();
-			}
-			return CommonUtil.createBuildResponse(todolist, HttpStatus.OK);
+	@GetMapping("/list")
+	@PreAuthorize("hasRole ('USER')")
+	public ResponseEntity<?> getAllTodoByUser() throws Exception {
+		List<TodoDto> todolist = todoService.getTodoByUser();
+		if (CollectionUtils.isEmpty(todolist)) {
+			return ResponseEntity.noContent().build();
 		}
-	
-	
-	}
+		return CommonUtil.createBuildResponse(todolist, HttpStatus.OK);
+	}  
+}

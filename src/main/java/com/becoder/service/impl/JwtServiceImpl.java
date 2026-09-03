@@ -14,9 +14,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.becoder.entity.User;
+import com.becoder.exception.JwtAuthenticationException;
 import com.becoder.service.JwtService;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -75,13 +78,19 @@ public class JwtServiceImpl implements JwtService{
 	}
 
 	private Claims extractAllClaims(String token) {
-		Claims claims = Jwts.parser()
-				.verifyWith (decrytKey (secretKey))
-				.build()
-				.parseSignedClaims (token)
-				.getPayload () ;
+		try {
+			return Jwts.parser().verifyWith(decrytKey(secretKey)).build().parseSignedClaims(token).getPayload();
+		} catch (ExpiredJwtException e) {
+			throw new JwtAuthenticationException("Token is Expired");
+		} catch (JwtException e) {
+			throw new JwtAuthenticationException("Invalid Jwt Token");
+		}
 
-				return claims;
+		catch (Exception e) {
+
+			throw e;
+		}
+
 	}
 
 	private SecretKey decrytKey(String secretKey2) {
@@ -107,11 +116,6 @@ public class JwtServiceImpl implements JwtService{
        // 10th -today - exp- 11th
 		
 		return expiredDate.before (new Date());
-
 	
 	}
-	
-	
-	
-	
 }

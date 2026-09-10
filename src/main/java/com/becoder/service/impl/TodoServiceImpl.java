@@ -12,6 +12,7 @@ import com.becoder.enums.TodoStatus;
 import com.becoder.exception.ResourceNotFoundException;
 import com.becoder.repository.TodoRepository;
 import com.becoder.service.TodoService;
+import com.becoder.util.CommonUtil;
 import com.becoder.util.Validation;
 
 @Service
@@ -60,8 +61,8 @@ public class TodoServiceImpl implements TodoService{
 
 	@Override
 	public List<TodoDto> getTodoByUser() {
-		Integer userld = 2;
-		List<Todo> todos = todoRepo.findByCreatedBy (userld);
+	    Integer userId =	CommonUtil.getLoggedInUser().getId();
+		List<Todo> todos = todoRepo.findByCreatedBy (userId);
 		return todos.stream().map(td -> mapper.map (td, TodoDto.class)).toList();
 	}
 

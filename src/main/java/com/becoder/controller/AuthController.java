@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.becoder.dto.LoginRequest;
 import com.becoder.dto.LoginResponse;
-import com.becoder.dto.UserDto;
+import com.becoder.dto.UserRequest;
 import com.becoder.service.UserService;
 import com.becoder.util.CommonUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +24,7 @@ public class AuthController {
 	private UserService userService;
 	
 	@PostMapping("/")
-	public ResponseEntity<?> registerUser(@RequestBody UserDto userDto, HttpServletRequest request) throws Exception {
+	public ResponseEntity<?> registerUser(@RequestBody UserRequest userDto, HttpServletRequest request) throws Exception {
 
 		String url=CommonUtil.getUrl (request);
 		Boolean register = userService.register(userDto , url);

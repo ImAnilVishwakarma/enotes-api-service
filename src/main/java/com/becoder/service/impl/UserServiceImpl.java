@@ -1,6 +1,5 @@
 package com.becoder.service.impl;
 
-import java.beans.Customizer;
 import java.util.List;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
@@ -9,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -16,7 +16,9 @@ import com.becoder.config.security.CustomUserDetails;
 import com.becoder.dto.EmailRequest;
 import com.becoder.dto.LoginRequest;
 import com.becoder.dto.LoginResponse;
-import com.becoder.dto.UserDto;
+import com.becoder.dto.PasswordChngRequest;
+import com.becoder.dto.UserRequest;
+import com.becoder.dto.UserResponse;
 import com.becoder.entity.AccountStatus;
 import com.becoder.entity.Role;
 import com.becoder.entity.User;
@@ -24,6 +26,7 @@ import com.becoder.repository.RoleRepository;
 import com.becoder.repository.UserRepository;
 import com.becoder.service.JwtService;
 import com.becoder.service.UserService;
+import com.becoder.util.CommonUtil;
 import com.becoder.util.Validation;
 
 @Service
@@ -48,16 +51,19 @@ public class UserServiceImpl implements UserService{
     @Autowired
     private AuthenticationManager authenticationManager;
     
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-    
+//    @Autowired
+//    private BCryptPasswordEncoder passwordEncoder;
+   
+	@Autowired    
+	private PasswordEncoder passwordEncoder;
+	    
     @Autowired
     private JwtService jwtService;
-
+    
 	
 	
 	@Override
-	public Boolean register(UserDto userDto, String url) throws Exception {
+	public Boolean register(UserRequest userDto, String url) throws Exception {
 		validation.userValidation(userDto);
 		User user = mapper.map(userDto, User.class);
 		
@@ -113,7 +119,7 @@ public class UserServiceImpl implements UserService{
 	    emailService.sendEmail(emailRequest);
 	}
 	
-	private void setRole(UserDto userDto, User user) {
+	public void setRole(UserRequest userDto, User user) {
 			List<Integer> regRoleld = userDto.getRoles().stream().map(r->r.getId()).toList();
 			List<Role> roles = rolerepo.findAllById(regRoleld);
 			user.setRoles(roles);
@@ -130,7 +136,7 @@ public class UserServiceImpl implements UserService{
 					String token = jwtService.generateToken(customUserDetails.getUser());
 					
 					LoginResponse loginResponse = LoginResponse.builder()
-							.user(mapper.map(customUserDetails.getUser(), UserDto.class))
+							.user(mapper.map(customUserDetails.getUser(), UserResponse.class))
 							.token(token)
 							.build();
 
@@ -139,7 +145,35 @@ public class UserServiceImpl implements UserService{
 				return null;
 
 			}
-			
-			
 
-		}
+			@Override
+			public void changePassword(PasswordChngRequest passwordRequest) {
+
+			    User loggedInUser = CommonUtil.getLoggedInUser();
+
+			    if (passwordRequest.getOldPassword() == null ||
+			        passwordRequest.getOldPassword().isBlank()) {
+
+			        throw new IllegalArgumentException("Old password cannot be empty");
+			    }
+
+			    if (passwordRequest.getNewPassword() == null ||
+			        passwordRequest.getNewPassword().isBlank()) {
+
+			        throw new IllegalArgumentException("New password cannot be empty");
+			    }
+
+			    if (!passwordEncoder.matches(
+			            passwordRequest.getOldPassword(),
+			            loggedInUser.getPassword())) {
+
+			        throw new IllegalArgumentException("Old password is incorrect!");
+			    }
+
+			    loggedInUser.setPassword(
+			            passwordEncoder.encode(passwordRequest.getNewPassword())
+			    );
+
+			    userRepo.save(loggedInUser);
+			}
+}

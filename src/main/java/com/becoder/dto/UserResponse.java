@@ -2,6 +2,8 @@ package com.becoder.dto;
 
 import java.util.List;
 
+import com.becoder.dto.UserRequest.RoleDto;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class UserDto {
+public class UserResponse {
 	
 		private Integer id;
 
@@ -26,10 +28,10 @@ public class UserDto {
 
 		private String mobNo;
 		
-		private String password;
+		private statusDTO status;
 
 		private List<RoleDto> roles;
-		
+				
 		
 		@AllArgsConstructor
 		@NoArgsConstructor
@@ -41,6 +43,18 @@ public class UserDto {
 		private String name;
 
 		}
+
+		@AllArgsConstructor
+		@NoArgsConstructor
+		@Getter
+		@Setter
+		@Builder
+		public static class statusDTO{
+		private Integer id;
+		private Boolean isActive;
+
+		}
+
 
 
 }

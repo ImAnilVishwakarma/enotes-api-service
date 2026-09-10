@@ -7,6 +7,6 @@ import com.becoder.entity.Todo;
 
 public interface TodoRepository extends JpaRepository<Todo, Integer>{
 
-	List<Todo> findByCreatedBy(Integer userld);
+	List<Todo> findByCreatedBy(Integer userId);
 
 }

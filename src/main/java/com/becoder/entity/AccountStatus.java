@@ -17,9 +17,10 @@ import lombok.Setter;
 @Builder
 @Entity
 public class AccountStatus {
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private Integer id;
-private Boolean isActive;
-private String verificationCode;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer id;
+	private Boolean isActive;
+	private String verificationCode;
+	private String passwordRestToken;
 }

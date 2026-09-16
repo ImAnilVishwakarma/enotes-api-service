@@ -8,7 +8,6 @@ import com.becoder.dto.FavouriteNoteDto;
 import com.becoder.dto.NotesDto;
 import com.becoder.dto.NotesResponse;
 import com.becoder.entity.FileDetails;
-import com.becoder.entity.Notes;
 
 public interface NotesService {
 		
@@ -21,7 +20,9 @@ public interface NotesService {
 	public FileDetails getFileDetails(Integer id) throws Exception;
 
 	public NotesResponse getAllNotesByUser(Integer pageNo, Integer pageSize);
-
+	
+	public NotesResponse getNotesByUserSearch(Integer pageNo, Integer pageSize, String keyword);
+	
 	public void softDeleteNotes(Integer id) throws Exception;
 
 	public void restoreNotes(Integer id) throws Exception;
